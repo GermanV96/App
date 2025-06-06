@@ -105,24 +105,62 @@
             <section id="reportes" class="tab-content">
                 <h3 class="mb-4">Reportes</h3>
 
-                <div class="card mb-4">
+                <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Filtros</h5>
-                        <select class="form-select mb-2" id="filtro-periodo">
-                            <option value="semana">Esta semana</option>
-                            <option value="mes">Este mes</option>
-                            <option value="anio">Este año</option>
-                            <option value="todo" selected>Todos</option>
-                        </select>
-                        <select class="form-select" id="filtro-tipo">
-                            <option value="todos" selected>Todos los tipos</option>
-                            <option value="ingreso">Solo ingresos</option>
-                            <option value="egreso">Solo egresos</option>
-                        </select>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label">Período</label>
+                                <select class="form-select" id="filtro-periodo">
+                                    <option value="semana">Esta semana</option>
+                                    <option value="mes">Este mes</option>
+                                    <option value="anio">Este año</option>
+                                    <option value="todos" selected>Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" id="filtro-tipo">
+                                    <option value="todos" selected>Todos los tipos</option>
+                                    <option value="ingreso">Solo ingresos</option>
+                                    <option value="egreso">Solo egresos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Categoría</label>
+                                <select class="form-select" id="filtro-categoria">
+                                    <option value="todas" selected>Todas las categorías</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card mb-4">
+                <!-- Sección de Gráficos -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Visualización</h5>
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-4">
+                                <div class="chart-container">
+                                    <canvas id="graficoComparacion"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-4">
+                                <div class="chart-container">
+                                    <canvas id="graficoCategorias"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-4">
+                                <div class="chart-container">
+                                    <canvas id="graficoEvolucion"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Resumen</h5>
                         <div id="resumen-reporte"></div>
@@ -196,6 +234,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

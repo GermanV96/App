@@ -14,6 +14,9 @@ const categorias = [
 
 let movimientos = [];
 let editarModal = null;
+let graficoComparacion = null;
+let graficoCategorias = null;
+let graficoEvolucion = null;
 
 function obtenerFechaActual() {
     const hoy = new Date();
@@ -27,10 +30,12 @@ document.addEventListener('DOMContentLoaded', function () {
     editarModal = new bootstrap.Modal(document.getElementById('editarModal'));
     configurarPestanas();
     cargarCategorias();
+    cargarFiltroCategorias();
     document.getElementById('fecha-movimiento').value = obtenerFechaActual();
     document.getElementById('form-movimiento').addEventListener('submit', guardarMovimiento);
     document.getElementById('filtro-periodo').addEventListener('change', actualizarReportes);
     document.getElementById('filtro-tipo').addEventListener('change', actualizarReportes);
+    document.getElementById('filtro-categoria').addEventListener('change', actualizarReportes);
     document.getElementById('guardar-cambios-btn').addEventListener('click', guardarCambios);
     document.getElementById('eliminar-btn').addEventListener('click', eliminarMovimiento);
     cargarDatos();
@@ -66,6 +71,29 @@ function cargarCategorias() {
     });
     document.querySelectorAll('[name="tipo-movimiento"]').forEach(radio => {
         radio.addEventListener('change', cargarCategorias);
+    });
+}
+
+function cargarFiltroCategorias() {
+    const select = document.getElementById('filtro-categoria');
+    select.innerHTML = '<option value="todas" selected>Todas las categorías</option>';
+    
+    // Agrupar categorías únicas
+    const categoriasUnicas = {};
+    categorias.forEach(cat => {
+        if (!categoriasUnicas[cat.nombre]) {
+            categoriasUnicas[cat.nombre] = cat;
+        }
+    });
+    
+    // Ordenar alfabéticamente
+    const categoriasOrdenadas = Object.values(categoriasUnicas).sort((a, b) => a.nombre.localeCompare(b.nombre));
+    
+    categoriasOrdenadas.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.nombre;
+        option.textContent = cat.nombre;
+        select.appendChild(option);
     });
 }
 
@@ -290,15 +318,17 @@ function actualizarCategoriasResumen() {
 function actualizarReportes() {
     const periodo = document.getElementById('filtro-periodo').value;
     const tipo = document.getElementById('filtro-tipo').value;
+    const categoriaSeleccionada = document.getElementById('filtro-categoria').value;
     
     // Filtrar movimientos
     let movimientosFiltrados = [...movimientos];
-    
-    // Filtrar por periodo
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    // Filtro por período
     if (periodo === 'semana') {
         const inicioSemana = new Date(hoy);
-        inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+        inicioSemana.setDate(hoy.getDate() - hoy.getDay() + (hoy.getDay() === 0 ? -6 : 1));
         movimientosFiltrados = movimientosFiltrados.filter(m => new Date(m.fecha) >= inicioSemana);
     } else if (periodo === 'mes') {
         const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -308,9 +338,17 @@ function actualizarReportes() {
         movimientosFiltrados = movimientosFiltrados.filter(m => new Date(m.fecha) >= inicioAnio);
     }
     
-    // Filtrar por tipo
+    // Filtro por tipo
     if (tipo !== 'todos') {
         movimientosFiltrados = movimientosFiltrados.filter(m => m.tipo === tipo);
+    }
+    
+    // Filtro por categoría
+    if (categoriaSeleccionada !== 'todas') {
+        movimientosFiltrados = movimientosFiltrados.filter(m => {
+            const cat = categorias.find(c => c.id === m.categoria);
+            return cat && cat.nombre === categoriaSeleccionada;
+        });
     }
     
     // Ordenar por fecha descendente
@@ -321,8 +359,15 @@ function actualizarReportes() {
     const egresos = movimientosFiltrados.filter(m => m.tipo === 'egreso').reduce((sum, m) => sum + m.monto, 0);
     const balance = ingresos - egresos;
     
+    // Determinar el título del período
+    let tituloPeriodo = "Todos los movimientos";
+    if (periodo === 'semana') tituloPeriodo = "Resumen Semanal";
+    else if (periodo === 'mes') tituloPeriodo = "Resumen Mensual";
+    else if (periodo === 'anio') tituloPeriodo = "Resumen Anual";
+    
     const resumenReporte = document.getElementById('resumen-reporte');
     resumenReporte.innerHTML = `
+        <h6 class="mb-3">${tituloPeriodo}</h6>
         <div class="d-flex justify-content-between mb-2">
             <span>Ingresos:</span>
             <span class="text-success">${formatearMoneda(ingresos)}</span>
@@ -343,30 +388,240 @@ function actualizarReportes() {
     
     if (movimientosFiltrados.length === 0) {
         listaReportes.innerHTML = '<div class="text-center py-3 text-muted">No hay movimientos con estos filtros</div>';
-        return;
+    } else {
+        movimientosFiltrados.forEach(mov => {
+            const categoria = categorias.find(c => c.id === mov.categoria) || { nombre: mov.categoria };
+            const item = document.createElement('div');
+            item.className = `list-group-item list-group-item-action ${mov.tipo} mb-2`;
+            item.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>${categoria.nombre}</strong>
+                        <div class="small text-muted">${mov.descripcion || 'Sin descripción'}</div>
+                    </div>
+                    <div class="${mov.tipo === 'ingreso' ? 'text-success' : 'text-danger'}">
+                        ${mov.tipo === 'ingreso' ? '+' : '-'}${formatearMoneda(mov.monto)}
+                    </div>
+                </div>
+                <div class="small text-muted mt-1">${formatearFecha(mov.fecha)}</div>
+                <button class="btn btn-sm btn-outline-primary editar-btn">
+                    <i class="bi bi-pencil"></i> Editar
+                </button>
+            `;
+            item.querySelector('.editar-btn').addEventListener('click', () => abrirEdicion(mov.id));
+            listaReportes.appendChild(item);
+        });
     }
     
+    // Actualizar gráficos
+    actualizarGraficos(movimientosFiltrados);
+}
+
+function actualizarGraficos(movimientosFiltrados) {
+    // Destruir gráficos existentes si hay
+    if (graficoComparacion) graficoComparacion.destroy();
+    if (graficoCategorias) graficoCategorias.destroy();
+    if (graficoEvolucion) graficoEvolucion.destroy();
+    
+    // Gráfico de comparación
+    const ctxComparacion = document.getElementById('graficoComparacion').getContext('2d');
+    const ingresos = movimientosFiltrados.filter(m => m.tipo === 'ingreso').reduce((sum, m) => sum + m.monto, 0);
+    const egresos = movimientosFiltrados.filter(m => m.tipo === 'egreso').reduce((sum, m) => sum + m.monto, 0);
+    
+    graficoComparacion = new Chart(ctxComparacion, {
+        type: 'bar',
+        data: {
+            labels: ['Ingresos', 'Egresos'],
+            datasets: [{
+                label: 'Comparación',
+                data: [ingresos, egresos],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(220, 53, 69, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Comparación Ingresos vs Egresos',
+                    font: {
+                        size: 14
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-AR');
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Gráfico de categorías
+    const ctxCategorias = document.getElementById('graficoCategorias').getContext('2d');
+    
+    // Agrupar por categoría
+    const datosCategorias = {};
     movimientosFiltrados.forEach(mov => {
-        const categoria = categorias.find(c => c.id === mov.categoria) || { nombre: mov.categoria };
-        const item = document.createElement('div');
-        item.className = `list-group-item list-group-item-action ${mov.tipo} mb-2`;
-        item.innerHTML = `
-            <div class="d-flex justify-content-between">
-                <div>
-                    <strong>${categoria.nombre}</strong>
-                    <div class="small text-muted">${mov.descripcion || 'Sin descripción'}</div>
-                </div>
-                <div class="${mov.tipo === 'ingreso' ? 'text-success' : 'text-danger'}">
-                    ${mov.tipo === 'ingreso' ? '+' : '-'}${formatearMoneda(mov.monto)}
-                </div>
-            </div>
-            <div class="small text-muted mt-1">${formatearFecha(mov.fecha)}</div>
-            <button class="btn btn-sm btn-outline-primary editar-btn">
-                <i class="bi bi-pencil"></i> Editar
-            </button>
-        `;
-        item.querySelector('.editar-btn').addEventListener('click', () => abrirEdicion(mov.id));
-        listaReportes.appendChild(item);
+        const cat = categorias.find(c => c.id === mov.categoria) || { nombre: mov.categoria };
+        if (!datosCategorias[cat.nombre]) {
+            datosCategorias[cat.nombre] = 0;
+        }
+        datosCategorias[cat.nombre] += mov.monto;
+    });
+    
+    // Ordenar y preparar datos para el gráfico
+    const categoriasOrdenadas = Object.entries(datosCategorias)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8); // Mostrar solo las 8 categorías principales
+    
+    graficoCategorias = new Chart(ctxCategorias, {
+        type: 'doughnut',
+        data: {
+            labels: categoriasOrdenadas.map(item => item[0]),
+            datasets: [{
+                label: 'Monto por Categoría',
+                data: categoriasOrdenadas.map(item => item[1]),
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(199, 199, 199, 0.7)',
+                    'rgba(83, 102, 255, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Distribución por Categorías',
+                    font: {
+                        size: 14
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': $' + context.raw.toLocaleString('es-AR');
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Gráfico de evolución por categoría
+    const ctxEvolucion = document.getElementById('graficoEvolucion').getContext('2d');
+    
+    // Agrupar por categoría y mes
+    const datosEvolucion = {};
+    movimientosFiltrados.forEach(mov => {
+        const fecha = new Date(mov.fecha);
+        const mes = fecha.getMonth() + 1;
+        const año = fecha.getFullYear();
+        const clave = `${mes}/${año}`;
+        const cat = categorias.find(c => c.id === mov.categoria) || { nombre: mov.categoria };
+        
+        if (!datosEvolucion[clave]) {
+            datosEvolucion[clave] = {};
+        }
+        
+        if (!datosEvolucion[clave][cat.nombre]) {
+            datosEvolucion[clave][cat.nombre] = 0;
+        }
+        
+        datosEvolucion[clave][cat.nombre] += mov.monto;
+    });
+    
+    // Preparar datos para el gráfico
+    const meses = Object.keys(datosEvolucion).sort((a, b) => {
+        const [mesA, añoA] = a.split('/').map(Number);
+        const [mesB, añoB] = b.split('/').map(Number);
+        return new Date(añoA, mesA) - new Date(añoB, mesB);
+    });
+    
+    const categoriasUnicas = [...new Set(movimientosFiltrados.map(m => {
+        const cat = categorias.find(c => c.id === m.categoria);
+        return cat ? cat.nombre : m.categoria;
+    }))];
+    
+    const datasets = categoriasUnicas.slice(0, 5).map((categoria, index) => {
+        const colores = [
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)'
+        ];
+        
+        return {
+            label: categoria,
+            data: meses.map(mes => datosEvolucion[mes][categoria] || 0),
+            backgroundColor: colores[index % colores.length],
+            borderWidth: 1
+        };
+    });
+    
+    graficoEvolucion = new Chart(ctxEvolucion, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Evolución por Categoría',
+                    font: {
+                        size: 14
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': $' + context.raw.toLocaleString('es-AR');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString('es-AR');
+                        }
+                    }
+                }
+            }
+        }
     });
 }
 

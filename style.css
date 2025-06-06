@@ -41,3 +41,56 @@
 .card-body {
     padding-right: 3rem;
 }
+
+/* Estilos para los gráficos */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* Mejoras para responsividad */
+@media (max-width: 992px) {
+    .chart-container {
+        height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-link span {
+        display: none;
+    }
+    
+    .nav-link i {
+        font-size: 1.2rem;
+    }
+    
+    .chart-container {
+        height: 220px;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .list-group-item, 
+    .card-body {
+        padding-right: 1rem;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+}
+
+/* Estilos para los filtros */
+.form-select {
+    margin-bottom: 0.5rem;
+}
+
+.card-title {
+    margin-bottom: 1rem;
+}

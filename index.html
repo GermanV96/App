@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Finanzas Móvil</title>
+    <title>Mi Gestor Financiero</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-light">
     <div class="container-fluid p-0">
-        <!-- Navegación -->
         <nav class="nav nav-pills bg-white shadow-sm">
             <a class="nav-link active" href="#" data-tab="resumen">
                 <i class="bi bi-house-door"></i> <span>Resumen</span>
@@ -21,11 +20,13 @@
             <a class="nav-link" href="#" data-tab="reportes">
                 <i class="bi bi-graph-up"></i> <span>Reportes</span>
             </a>
+            <a class="nav-link" href="#" data-tab="categorias">
+                <i class="bi bi-tags"></i> <span>Categorías</span>
+            </a>
         </nav>
 
-        <!-- Contenido principal -->
         <main class="p-3">
-            <!-- Resumen -->
+            <!-- Sección Resumen -->
             <section id="resumen" class="tab-content active">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3>Resumen Financiero</h3>
@@ -58,41 +59,41 @@
                 <div class="list-group" id="ultimos-movimientos"></div>
             </section>
 
-            <!-- Registro -->
+            <!-- Sección Registro -->
             <section id="registro" class="tab-content">
                 <h3 class="mb-4">Registrar Movimiento</h3>
                 <form id="form-movimiento">
                     <div class="mb-3">
                         <label class="form-label">Tipo de movimiento</label>
                         <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="tipo-movimiento" id="ingreso-radio" value="ingreso" checked>
+                            <input type="radio" class="btn-check" name="tipo" id="ingreso-radio" value="ingreso" checked>
                             <label class="btn btn-outline-success" for="ingreso-radio">Ingreso</label>
-                            <input type="radio" class="btn-check" name="tipo-movimiento" id="egreso-radio" value="egreso">
+                            <input type="radio" class="btn-check" name="tipo" id="egreso-radio" value="egreso">
                             <label class="btn btn-outline-danger" for="egreso-radio">Egreso</label>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Categoría</label>
-                        <select class="form-select" id="categoria-movimiento" required></select>
+                        <select class="form-select" name="categoria" id="categoria-movimiento" required></select>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Descripción (opcional)</label>
-                        <input type="text" class="form-control" id="descripcion-movimiento">
+                        <input type="text" class="form-control" name="descripcion" id="descripcion-movimiento">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Monto</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input type="number" class="form-control" id="monto-movimiento" min="0" step="0.01" required>
+                            <input type="number" class="form-control" name="monto" id="monto-movimiento" min="0" step="0.01" required>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="fecha-movimiento" required>
+                        <input type="date" class="form-control" name="fecha" id="fecha-movimiento" required>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">
@@ -101,15 +102,83 @@
                 </form>
             </section>
 
-            <!-- Reportes -->
+            <!-- Sección Reportes -->
             <section id="reportes" class="tab-content">
                 <h3 class="mb-4">Reportes</h3>
 
+                <!-- Búsqueda Avanzada -->
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Filtros</h5>
-                        <div class="row g-2">
+                        <h5 class="card-title">
+                            <i class="bi bi-search"></i> Búsqueda Avanzada
+                        </h5>
+                        <div class="row g-3">
                             <div class="col-md-4">
+                                <label class="form-label">Buscar por descripción</label>
+                                <input type="text" class="form-control" id="buscar-descripcion" 
+                                       placeholder="Ej: supermercado, combustible...">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Monto mínimo</label>
+                                <input type="number" class="form-control" id="buscar-monto-min" 
+                                       placeholder="0" step="0.01">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Monto máximo</label>
+                                <input type="number" class="form-control" id="buscar-monto-max" 
+                                       placeholder="Sin límite" step="0.01">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Desde</label>
+                                <input type="date" class="form-control" id="buscar-fecha-desde">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Hasta</label>
+                                <input type="date" class="form-control" id="buscar-fecha-hasta">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-3">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" id="buscar-tipo">
+                                    <option value="todos">Todos</option>
+                                    <option value="ingreso">Solo Ingresos</option>
+                                    <option value="egreso">Solo Egresos</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Categoría específica</label>
+                                <select class="form-select" id="buscar-categoria">
+                                    <option value="todas">Todas las categorías</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary me-2" id="ejecutar-busqueda">
+                                    <i class="bi bi-search"></i> Buscar
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="limpiar-busqueda">
+                                    <i class="bi bi-x-circle"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Resultados de búsqueda -->
+                        <div id="resultados-busqueda" class="mt-3" style="display: none;">
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Resultados de búsqueda</h6>
+                                <span id="contador-resultados" class="badge bg-primary"></span>
+                            </div>
+                            <div id="lista-resultados" class="list-group"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Filtros Rápidos</h5>
+                        <div class="row g-2">
+                            <div class="col-md-3">
                                 <label class="form-label">Período</label>
                                 <select class="form-select" id="filtro-periodo">
                                     <option value="semana">Esta semana</option>
@@ -118,7 +187,19 @@
                                     <option value="todos" selected>Todos</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Año</label>
+                                <select class="form-select" id="filtro-anio">
+                                    <option value="todos" selected>Todos los años</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Mes</label>
+                                <select class="form-select" id="filtro-mes">
+                                    <option value="todos" selected>Todos los meses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
                                 <label class="form-label">Tipo</label>
                                 <select class="form-select" id="filtro-tipo">
                                     <option value="todos" selected>Todos los tipos</option>
@@ -126,7 +207,7 @@
                                     <option value="egreso">Solo egresos</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Categoría</label>
                                 <select class="form-select" id="filtro-categoria">
                                     <option value="todas" selected>Todas las categorías</option>
@@ -136,7 +217,6 @@
                     </div>
                 </div>
 
-                <!-- Sección de Gráficos -->
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Visualización</h5>
@@ -169,11 +249,85 @@
 
                 <h5 class="mb-3">Movimientos</h5>
                 <div id="lista-reportes"></div>
+
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Exportar/Importar Datos</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button id="exportar-btn" class="btn btn-success">
+                                <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+                            </button>
+                            <button id="exportar-json-btn" class="btn btn-info">
+                                <i class="bi bi-file-code"></i> Exportar a JSON
+                            </button>
+                            <button id="importar-btn" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Importar Datos
+                            </button>
+                            <input type="file" id="importar-input" accept=".csv,.json" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección Categorías -->
+            <section id="categorias" class="tab-content">
+                <h3 class="mb-4">Administrar Categorías</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Agregar Nueva Categoría</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="form-categoria">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre de la categoría</label>
+                                        <input type="text" class="form-control" name="nombre" id="nombre-categoria" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Tipo</label>
+                                        <div class="btn-group w-100" role="group">
+                                            <input type="radio" class="btn-check" name="tipo-categoria" id="ingreso-categoria" value="ingreso" checked>
+                                            <label class="btn btn-outline-success" for="ingreso-categoria">Ingreso</label>
+                                            <input type="radio" class="btn-check" name="tipo-categoria" id="egreso-categoria" value="egreso">
+                                            <label class="btn btn-outline-danger" for="egreso-categoria">Egreso</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-plus-circle"></i> Agregar Categoría
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Categorías Existentes</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Filtrar por tipo</label>
+                                    <select class="form-select" id="filtro-tipo-categoria">
+                                        <option value="todas" selected>Todas</option>
+                                        <option value="ingreso">Solo Ingresos</option>
+                                        <option value="egreso">Solo Egresos</option>
+                                    </select>
+                                </div>
+                                <div id="lista-categorias" class="categoria-lista"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
 
-    <!-- Modal edición -->
+    <!-- Modal Edición -->
     <div class="modal fade" id="editarModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -232,9 +386,12 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Container para alertas -->
+    <div id="alertas-container"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

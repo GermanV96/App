@@ -1,56 +1,165 @@
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Pestañas */
 .tab-content {
     display: none;
+    animation: fadeIn 0.3s ease-in-out;
 }
+
 .tab-content.active {
     display: block;
 }
+
+.nav-link {
+    transition: all 0.3s ease;
+}
+
 .nav-link.active {
     font-weight: bold;
     background-color: #f8f9fa !important;
+    border-bottom: 3px solid #0d6efd;
 }
 
+/* Movimientos */
+.list-group-item.ingreso {
+    border-left: 4px solid #198754;
+}
+
+.list-group-item.egreso {
+    border-left: 4px solid #dc3545;
+}
+
+/* Chips de categorías */
 .categoria-chip {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 1rem;
-    font-size: 0.8rem;
-    margin-right: 0.3rem;
-    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .ingreso-chip {
     background-color: #d4edda;
     color: #155724;
 }
+
 .egreso-chip {
     background-color: #f8d7da;
     color: #721c24;
 }
 
+/* Botones de acción */
 .editar-btn {
     transition: all 0.2s;
     opacity: 0.7;
     transform: scale(0.9);
 }
+
 .list-group-item:hover .editar-btn,
 .card:hover .editar-btn {
     opacity: 1;
     transform: scale(1);
 }
-.list-group-item,
-.card-body {
-    padding-right: 3rem;
-}
 
-/* Estilos para los gráficos */
+/* Gráficos */
 .chart-container {
     position: relative;
     height: 300px;
     width: 100%;
     margin-bottom: 1rem;
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Mejoras para responsividad */
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Categorías */
+.categoria-lista {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.categoria-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.categoria-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.categoria-item.ingreso {
+    border-left: 4px solid #198754;
+}
+
+.categoria-item.egreso {
+    border-left: 4px solid #dc3545;
+}
+
+.categoria-nombre {
+    font-weight: 500;
+    flex-grow: 1;
+}
+
+.categoria-tipo {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+.categoria-tipo.ingreso {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.categoria-tipo.egreso {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.btn-eliminar-categoria {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Responsive */
 @media (max-width: 992px) {
     .chart-container {
         height: 250px;
@@ -61,11 +170,9 @@
     .nav-link span {
         display: none;
     }
-    
     .nav-link i {
         font-size: 1.2rem;
     }
-    
     .chart-container {
         height: 220px;
     }
@@ -75,22 +182,89 @@
     .card-body {
         padding: 1rem;
     }
-    
-    .list-group-item, 
-    .card-body {
-        padding-right: 1rem;
-    }
-    
-    .chart-container {
-        height: 200px;
+    .btn-exportacion {
+        width: 100%;
+        margin-bottom: 0.5rem;
     }
 }
 
-/* Estilos para los filtros */
-.form-select {
+/* Búsqueda avanzada */
+#resultados-busqueda {
+    border-top: 2px solid #e9ecef;
+    background-color: #f8f9fa;
+    border-radius: 0 0 0.375rem 0.375rem;
+    padding: 1rem;
+}
+
+#contador-resultados {
+    font-size: 0.875rem;
+}
+
+#lista-resultados .list-group-item {
+    border: 1px solid #dee2e6;
     margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
 }
 
-.card-title {
-    margin-bottom: 1rem;
+#lista-resultados .list-group-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#lista-resultados .list-group-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Campos de búsqueda */
+.busqueda-field {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.busqueda-field:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Botones de búsqueda */
+#ejecutar-busqueda {
+    background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#ejecutar-busqueda:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+}
+
+#limpiar-busqueda {
+    transition: all 0.3s ease;
+}
+
+#limpiar-busqueda:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Destacar criterios de búsqueda activos */
+.campo-busqueda-activo {
+    border-color: #198754 !important;
+    background-color: #f8fff9;
+}
+
+/* Animación para resultados */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#resultados-busqueda {
+    animation: slideInUp 0.3s ease-out;
 }
